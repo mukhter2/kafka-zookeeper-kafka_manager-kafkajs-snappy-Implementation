@@ -1,0 +1,67 @@
+version: "3"
+services:
+  zookeeper:
+    image: "bitnami/zookeeper:latest"
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_MY_ID=1
+  kafka1:
+    image: "wurstmeister/kafka"
+    container_name: "kafka1"
+    hostname: kafka1
+    ports:
+      - "19092:19092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://:19092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.16.1.218:19092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+  kafka2:
+    image: "wurstmeister/kafka"
+    container_name: "kafka2"
+    hostname: kafka2
+    ports:
+      - "29092:29092"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_LISTENERS=PLAINTEXT://:29092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.16.1.218:29092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+
+  kafka3:
+    image: "wurstmeister/kafka"
+    container_name: "kafka3"
+    hostname: kafka3
+    ports:
+      - "39092:39092"
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_LISTENERS=PLAINTEXT://:39092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.16.1.218:39092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+  kafka_manager:
+    image: hlebalbau/kafka-manager:stable
+    container_name: kakfa-manager
+    restart: always
+    ports:
+      - "9000:9000"
+    depends_on:
+      - zookeeper
+      - kafka1
+      - kafka2
+      - kafka3
+    environment:
+      ZK_HOSTS: "zookeeper:2181"
+      APPLICATION_SECRET: "random-secret"
+    command: -Dpidfile.path=/dev/null
